@@ -1,0 +1,48 @@
+# Build output
+[Bb]uild/
+[Oo]bj/
+[Oo]ut/
+x64/
+x86/
+ARM/
+ARM64/
+
+# VS files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.opendb
+*.ipch
+*.aps
+*.pch
+*.pdb
+*.ilk
+*.obj
+*.lib
+*.exp
+*.exe
+*.dll
+*.sys
+*.log
+
+# WDK / driver signing
+*.cer
+*.pfx
+*.cat
+*.inf.bak
+
+# Misc
+*.bak
+*.tmp
+*.swp
+*~
+Thumbs.db
+desktop.ini
