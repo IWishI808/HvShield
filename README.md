@@ -1,35 +1,70 @@
 # HvShield
 
-Hypervisor-based memory integrity monitor using Intel VT-x and EPT (Extended Page Tables).
+HvShield is a defensive security research prototype for hypervisor-based memory
+integrity monitoring on Windows x64. It explores how Intel VT-x and Extended
+Page Tables can be used to observe and restrict access to protected kernel
+memory pages from below the operating system.
 
-Monitors and enforces page-level read/write/execute permissions on physical memory regions from outside the OS kernel. Intended for detecting rootkits, code injection, and unauthorized memory modifications on protected pages.
+The project is intentionally scoped as research code. It is useful for studying
+VMX setup, VMCS state, EPT construction, and EPT-violation based detection. It is
+not a production driver and it is not intended to be used outside an authorized
+lab environment.
 
-## How it works
+## What is implemented
 
-1. Enables VMX operation and launches the host OS as a guest in VMX non-root mode
-2. Builds an identity-mapped EPT structure (using 2MB large pages by default, splitting to 4K where fine-grained control is needed)
-3. Marks protected physical pages with restricted EPT permissions
-4. EPT violations on protected pages trap into the VMM, which logs the violation and optionally injects an exception back into the guest
+- VMX support checks through CPUID and VMX capability MSRs
+- VMXON region allocation and VMX entry bootstrap helpers
+- VMCS field definitions and minimum VMCS setup scaffolding
+- Identity-mapped EPT construction with 2 MB pages
+- MTRR-aware EPT memory type selection for variable MTRR ranges
+- EPT structure definitions for PML4, PDPT, PD, and PT entries
+- Protected-page metadata and EPT permission control primitives
+
+## Defensive research goals
+
+HvShield is designed around defensive memory integrity use cases:
+
+- detecting writes to protected kernel code pages
+- experimenting with EPT-backed monitoring of sensitive memory regions
+- studying rootkit-style memory modification from a hypervisor perspective
+- validating VMCS and EPT behavior in a controlled Windows lab
 
 ## Current status
 
-Early development. VMX bootstrap and EPT core are functional. VMCS setup covers the minimum fields needed to launch. No guest state save/restore yet, no multi-processor support.
+This repository is an early source snapshot. The VMX and EPT core are present,
+but several pieces required for a stable production VMM are intentionally called
+out as unfinished in the source:
 
-## Build
+- full guest state save and restore is not complete
+- multi-processor launch and scheduling are not implemented
+- INVEPT after EPT changes is not implemented
+- fixed-range MTRR handling is incomplete
+- no hardened policy engine, telemetry pipeline, or installer is included
 
-Requirements:
+## Build notes
+
+Requirements for integrating the code into a local driver project:
+
 - Visual Studio 2022
-- Windows Driver Kit (WDK) 10.0.22621.0 or later
-- x64 target only (no x86, no ARM)
+- Windows Driver Kit 10.0.22621.0 or later
+- x64 target
+- test-signing enabled in a lab VM
 
-Build from VS developer command prompt:
+This public repository currently contains the core source files, not a complete
+WDK solution. To build it, import `src/vmx.c`, `src/ept.c`, and
+`src/hvshield.h` into a WDM/KMDF driver project and compile for x64.
 
-```
-msbuild HvShield.sln /p:Configuration=Release /p:Platform=x64
-```
+## Responsible use
 
-Or open `HvShield.sln` in Visual Studio and build the driver project.
+This project is for defensive security research, education, and authorized lab
+testing only. It does not include exploitation, persistence, evasion, or
+deployment tooling.
+
+## Related writeups
+
+- [VMCS by Practice](https://iwishi808.github.io/2026/05/20/vmcs-by-practice/)
+- [EPT Internals](https://iwishi808.github.io/2026/05/18/ept-internals/)
 
 ## License
 
-None yet. Do not redistribute.
+MIT
